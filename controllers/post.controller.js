@@ -123,10 +123,28 @@ const deletePost = async (req, res) => {
   }
 };
 
+const getUsersPosts = async  (req,res) => {
+  const {userId} = req.params
+  const posts = await Post.find({
+    author: userId
+  })
+  if(!posts) {
+    return res.json({
+      message: "No Posts Found!",
+      success: false
+    })
+  } res.json({
+    message: "Found!",
+    success: true,
+    posts
+  })
+}
+
 module.exports = {
     createPost,
     getPosts,
     getPostById,
     toggleLikePost,
-    deletePost
+    deletePost,
+    getUsersPosts
 }
