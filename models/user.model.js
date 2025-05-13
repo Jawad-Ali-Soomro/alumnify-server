@@ -59,6 +59,10 @@ const UserSchema = new Schema({
     type: Number,
     default: null
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
 
   last_login: { type: Date },
   created_at: { type: Date, default: Date.now },

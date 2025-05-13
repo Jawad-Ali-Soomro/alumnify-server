@@ -1,4 +1,5 @@
 const { createEvent, getAllEvents } = require("./event.controller");
+const { addJob, getAllJobs } = require("./job.controller");
 const {
   createPost,
   getPosts,
@@ -15,6 +16,8 @@ const {
   removeFriend,
   getUserById,
   updateUser,
+  verifyUnverifyUser,
+  deleteUser,
 } = require("./user.controllers");
 
 module.exports = {
@@ -32,5 +35,9 @@ module.exports = {
   updateUser,
   createEvent,
   getAllEvents,
-  getUsersPosts
+  getUsersPosts,
+  addJob,
+  getAllJobs,
+  verifyUnverifyUser,
+  deleteUser
 };

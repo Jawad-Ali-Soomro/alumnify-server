@@ -1,5 +1,5 @@
 const { signToken } = require("../middlewares");
-const { User } = require("../models");
+const { User, Post } = require("../models");
 
 const newUser = async (req, res) => {
   const { username, email, password } = req.body;
@@ -250,6 +250,36 @@ const updateUser = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
+const verifyUnverifyUser = async (req,res) => {
+ const {userId} = req.params
+ const findUser = await User.findById(userId)
+ if(!findUser) {
+  return res.json({
+    success: false,
+    message: "User not found!"
+  })
+ } 
+ else if (findUser.isVerified == false) {
+  findUser.isVerified = true
+  await findUser.save()
+ }
+ else if (findUser.isVerified == true) {
+  findUser.isVerified = false
+  await findUser.save()
+ }
+}
+
+const deleteUser = async (req,res) => {
+  const {userId} = req.params
+  await User.findOneAndDelete({_id: userId})
+  await Post.findOneAndDelete({author: userId})
+  return res.json({
+    success: true,
+    message: "Deleted!"
+  })
+}
+
 module.exports = {
   newUser,
   loginUser,
@@ -258,5 +288,7 @@ module.exports = {
   checkFriendship,
   removeFriend,
   getUserById,
-  updateUser
+  updateUser,
+  verifyUnverifyUser,
+  deleteUser
 };
