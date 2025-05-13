@@ -67,7 +67,11 @@ const UserSchema = new Schema({
   last_login: { type: Date },
   created_at: { type: Date, default: Date.now },
   updated_at: { type: Date, default: Date.now },
-  friends: [{ 
+  followers: [{ 
+    type: Schema.Types.ObjectId, 
+    ref: 'User' 
+  }],
+  following: [{ 
     type: Schema.Types.ObjectId, 
     ref: 'User' 
   }],

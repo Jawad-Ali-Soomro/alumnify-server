@@ -82,9 +82,15 @@ const getAllUsers = async (req, res) => {
 
 const addFriend = async (req, res) => {
   try {
-    const { userId, friendId } = req.body;
+    const { userId = "", friendId = "" } = req.body;
 
-    // Check if both users exist
+    if (userId === friendId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot follow yourself"
+      });
+    }
+
     const [user, friend] = await Promise.all([
       User.findById(userId),
       User.findById(friendId)
@@ -97,16 +103,15 @@ const addFriend = async (req, res) => {
       });
     }
 
-    // Check if they're already friends
-    if (user.friends.includes(friendId)) {
+    if (user.following.includes(friendId)) {
       return res.status(400).json({
         success: false,
-        message: "Already friends with this user"
+        message: "Already following this user"
       });
     }
 
-    user.friends.push(friendId);
-    friend.friends.push(userId);
+    user.following.push(friendId);
+    friend.followers.push(userId);
 
     await Promise.all([user.save(), friend.save()]);
 
@@ -124,37 +129,10 @@ const addFriend = async (req, res) => {
   }
 };
 
-const checkFriendship = async (req, res) => {
-  try {
-    const { userId, friendId } = req.query;
-    
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({
-        success: false,
-        message: "User not found"
-      });
-    }
-
-    const isFriend = user.friends.includes(friendId);
-    
-    return res.status(200).json({
-      success: true,
-      isFriend
-    });
-  } catch (error) {
-    console.error("Error checking friendship:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Error checking friendship",
-      error: error.message
-    });
-  }
-};
-
 const removeFriend = async (req, res) => {
   try {
-    const { userId, friendId } = req.body;
+    const { userId = "", friendId = "" } = req.body;
+
     const [user, friend] = await Promise.all([
       User.findById(userId),
       User.findById(friendId)
@@ -167,9 +145,8 @@ const removeFriend = async (req, res) => {
       });
     }
 
-    // Remove friend from both users' friend lists
-    user.friends = user.friends.filter(id => id.toString() !== friendId);
-    friend.friends = friend.friends.filter(id => id.toString() !== userId);
+    user.following = user.following.filter(id => !id.equals(friendId));
+    friend.followers = friend.followers.filter(id => !id.equals(userId));
 
     await Promise.all([user.save(), friend.save()]);
 
@@ -186,10 +163,11 @@ const removeFriend = async (req, res) => {
     });
   }
 };
+;
 
 const getUserById = async (req,res) => {
   const {userId} = req.params
-  const user = await User.findById(userId).populate("friends")
+  const user = await User.findById(userId).populate("followers").populate("following")
   if(!user) {
     return res.json({
       success: false,
@@ -280,12 +258,13 @@ const deleteUser = async (req,res) => {
   })
 }
 
+
+
 module.exports = {
   newUser,
   loginUser,
   getAllUsers,
   addFriend,
-  checkFriendship,
   removeFriend,
   getUserById,
   updateUser,
